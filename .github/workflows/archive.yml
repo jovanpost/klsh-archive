@@ -28,7 +28,9 @@ jobs:
       - name: Run archiver
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          GDRIVE_SA_JSON: ${{ secrets.GDRIVE_SA_JSON }}
+          GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
           GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
           # Scheduled runs are live. Manual runs default to dry.
           DRY_RUN: ${{ github.event_name == 'schedule' && 'false' || inputs.dry_run }}
