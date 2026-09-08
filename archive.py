@@ -45,7 +45,7 @@ PLAN = {
     # ---- klsh-15m (depth collector) ----
     "depth_book_sample": {
         "mode": "prune",
-        "time_col": "created_at",
+        "time_col": "sample_ts",
         "keep_days": 14,
         "owner": "klsh-15m",
     },
@@ -58,7 +58,7 @@ PLAN = {
     },
     "depth_sample": {
         "mode": "backup",
-        "time_col": "ts",
+        "time_col": "sample_ts",
         "owner": "klsh-15m",
     },
     "depth_settlement": {
