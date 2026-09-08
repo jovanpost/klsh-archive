@@ -24,7 +24,8 @@ import pandas as pd
 import psycopg
 import pyarrow as pa
 import pyarrow.parquet as pq
-from google.oauth2 import service_account
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
 
@@ -126,10 +127,20 @@ def log(msg):
 # --------------------------------------------------------------------------
 
 def drive_client():
-    info = json.loads(os.environ["GDRIVE_SA_JSON"])
-    creds = service_account.Credentials.from_service_account_info(
-        info, scopes=["https://www.googleapis.com/auth/drive"]
+    # OAuth as the actual Google account that owns the Drive folder —
+    # not a service account. Service accounts have zero storage quota
+    # of their own and cannot upload to a personal (non-Workspace)
+    # Drive even into a shared folder; only Shared Drives work for
+    # them, and personal Gmail accounts don't have those.
+    creds = Credentials(
+        token=None,
+        refresh_token=os.environ["GDRIVE_REFRESH_TOKEN"],
+        client_id=os.environ["GDRIVE_CLIENT_ID"],
+        client_secret=os.environ["GDRIVE_CLIENT_SECRET"],
+        token_uri="https://oauth2.googleapis.com/token",
+        scopes=["https://www.googleapis.com/auth/drive"],
     )
+    creds.refresh(Request())
     return build("drive", "v3", credentials=creds, cache_discovery=False)
 
 
