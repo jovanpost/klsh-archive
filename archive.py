@@ -1,5 +1,35 @@
-psycopg[binary]==3.2.3
-pandas==2.2.3
-pyarrow==18.1.0
-google-api-python-client==2.155.0
-google-auth==2.37.0
+name: Weekly archive
+
+on:
+  schedule:
+    # Sundays 08:00 UTC = 3am CT. Quiet time for both bots.
+    - cron: "0 8 * * 0"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (build parquet, upload nothing, delete nothing)"
+        type: boolean
+        default: true
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Run archiver
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GDRIVE_SA_JSON: ${{ secrets.GDRIVE_SA_JSON }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+          # Scheduled runs are live. Manual runs default to dry.
+          DRY_RUN: ${{ github.event_name == 'schedule' && 'false' || inputs.dry_run }}
+        run: python archive.py
